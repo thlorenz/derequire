@@ -6,6 +6,7 @@ function hash(data){
   return crypto.createHash('sha512').update(data).digest('base64');
 }
 var compare = hash(fs.readFileSync('./test/pouchdb.dereq.js', {encoding: 'utf8'}));
+var compareCjsSmartass = hash(fs.readFileSync('./test/cjs-smartass.dereq.js', {encoding: 'utf8'}));
 describe('derequire', function(){
   it('should work', function(){
     var exampleText = "var x=function(require,module,exports){var process=require(\"__browserify_process\");var requireText = \"require\";}";
@@ -60,4 +61,17 @@ describe('derequire', function(){
     ;
     derequire(txt).should.equal(expected);
   });
+  it('should fix cjs-smartassery', function (done){
+    fs.readFile('./test/cjs-smartass.js', {encoding:'utf8'}, function(err, data){
+      if(err){
+        return done(err);
+      }
+      var transformed = derequire(data);
+      // logging, so we can see what actually resulted here
+      console.log(transformed);
+      hash(transformed).should.equal(compareCjsSmartass);
+      done();
+    });
+
+  })
 });
